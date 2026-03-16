@@ -1,0 +1,36 @@
+/* src/components/About.module.css */
+.grid  { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 4rem; align-items: center; }
+.text p { font-size: 0.975rem; line-height: 1.85; color: var(--text2); margin-bottom: 1.1rem; }
+.text strong { color: var(--text); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+.chip {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem; border-radius: 4px;
+  border: 1px solid var(--b0); color: var(--text2); background: var(--card);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.card {
+  background: var(--card); border: 1px solid var(--b0);
+  border-radius: var(--r2); padding: 1.4rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  transform: scaleX(0); transition: transform 0.4s; transform-origin: left;
+}
+.card:hover { border-color: var(--b2); transform: translateY(-4px); }
+.card:hover::before { transform: scaleX(1); }
+.cardIcon  { font-size: 1.6rem; margin-bottom: 0.6rem; }
+.cardNum   {
+  font-size: 2rem; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.cardLabel { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--text3); margin-top: 0.35rem; line-height: 1.4; }
+.cardSub   { font-size: 0.7rem; color: var(--text3); margin-top: 0.2rem; }
+
+@media (max-width: 1024px) { .grid  { grid-template-columns: 1fr; gap: 3rem; } }
+@media (max-width: 480px)  { .cards { grid-template-columns: 1fr 1fr; } }

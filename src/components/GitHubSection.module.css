@@ -1,0 +1,65 @@
+/* src/components/GitHubSection.module.css */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+
+.left p { font-size: 0.975rem; line-height: 1.85; color: var(--text2); margin-bottom: 1.1rem; }
+.left strong { color: var(--text); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+.chip { cursor: default; }
+
+.card {
+  background: var(--card); border: 1px solid var(--b2);
+  border-radius: var(--r2); padding: 1.75rem;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--cyan), var(--purple));
+}
+
+.cardTop { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(45,140,255,0.3);
+}
+.cardName   { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.cardHandle { font-family: var(--mono); font-size: 0.72rem; color: var(--blue2); margin-top: 0.15rem; }
+.topRight   { margin-left: auto; }
+.openBadge  {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em;
+  padding: 0.25rem 0.7rem; border-radius: 100px;
+  background: rgba(0,217,126,0.1); border: 1px solid rgba(0,217,126,0.3); color: var(--green);
+}
+.openDot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.cardBio { font-size: 0.85rem; line-height: 1.65; color: var(--text2); margin-bottom: 1.25rem; }
+
+.statsRow {
+  display: flex; gap: 1.5rem;
+  padding: 1rem 0; border-top: 1px solid var(--b0); border-bottom: 1px solid var(--b0);
+  margin-bottom: 1.25rem;
+}
+.stat { text-align: center; }
+.statN { font-size: 1.25rem; font-weight: 800; color: var(--blue); }
+.statL { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em; color: var(--text3); margin-top: 0.2rem; }
+
+.techRow { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+
+.ghBtn {
+  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+  width: 100%; padding: 0.85rem;
+  border-radius: var(--r); font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+  background: linear-gradient(135deg, rgba(45,140,255,0.15), rgba(0,229,204,0.1));
+  border: 1px solid var(--b2); color: var(--blue2);
+  transition: all 0.3s;
+}
+.ghBtn:hover { background: linear-gradient(135deg, rgba(45,140,255,0.25), rgba(0,229,204,0.2)); border-color: var(--blue); box-shadow: 0 0 20px rgba(45,140,255,0.2); }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 2.5rem; } }

@@ -1,0 +1,172 @@
+/* src/components/AISearch.module.css */
+.overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(2,6,14,0.85);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 10vh;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  width: 100%; max-width: 680px;
+  background: var(--bg2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r2);
+  box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 30px rgba(45,140,255,0.1);
+  overflow: hidden;
+  animation: slideDown 0.25s ease;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+}
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.header {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--b0);
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+.headerLeft { display: flex; align-items: center; gap: 0.6rem; flex: 1; }
+.headerTitle { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text2); }
+
+.aiChip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em;
+  padding: 0.2rem 0.55rem; border-radius: 100px;
+  background: rgba(0,229,204,0.1); border: 1px solid rgba(0,229,204,0.3);
+  color: var(--cyan);
+}
+.aiDot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--cyan);
+}
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+
+.shortcuts {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--text3);
+  display: flex; align-items: center; gap: 0.3rem;
+}
+.shortcuts kbd {
+  background: var(--bg); border: 1px solid var(--b1);
+  border-radius: 3px; padding: 0.1rem 0.35rem; font-size: 0.58rem;
+}
+.closeBtn {
+  background: transparent; border: none;
+  color: var(--text3); font-size: 0.9rem;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r); transition: all 0.2s;
+}
+.closeBtn:hover { background: var(--b0); color: var(--text); }
+
+.inputWrap {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--b0);
+  flex-shrink: 0;
+}
+.input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--font); font-size: 1rem; color: var(--text);
+}
+.input::placeholder { color: var(--text3); }
+.clearBtn {
+  background: transparent; border: none;
+  color: var(--text3); font-size: 0.8rem;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: all 0.2s;
+}
+.clearBtn:hover { background: var(--b0); color: var(--text); }
+.searchBtn {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+  padding: 0.5rem 1rem; border-radius: var(--r);
+  background: var(--blue); border: none; color: white;
+  transition: all 0.2s; min-width: 70px;
+  display: flex; align-items: center; justify-content: center;
+}
+.searchBtn:hover { background: var(--blue2); }
+.spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  animation: spin 0.7s linear infinite;
+  display: block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.suggestions { padding: 1rem 1.25rem; overflow-y: auto; flex: 1; }
+.sugLabel {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  color: var(--text3); margin-bottom: 0.6rem;
+}
+.sugGrid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.sug {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font); font-size: 0.78rem; color: var(--text2);
+  padding: 0.45rem 0.85rem; border-radius: 100px;
+  background: var(--card); border: 1px solid var(--b0);
+  transition: all 0.2s; text-align: left;
+}
+.sug:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,204,0.05); transform: translateY(-1px); }
+
+.histList { display: flex; flex-direction: column; gap: 0.35rem; }
+.histItem {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font); font-size: 0.82rem; color: var(--text3);
+  padding: 0.4rem 0.6rem; border-radius: var(--r);
+  background: transparent; border: none; text-align: left;
+  transition: all 0.2s;
+}
+.histItem:hover { color: var(--text2); background: var(--b0); }
+
+.results { padding: 1rem 1.25rem; overflow-y: auto; flex: 1; }
+
+.answer {
+  background: rgba(0,229,204,0.05); border: 1px solid rgba(0,229,204,0.2);
+  border-radius: var(--r2); padding: 1.1rem; margin-bottom: 1rem;
+}
+.answerHeader {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em;
+  color: var(--text3); margin-bottom: 0.75rem;
+}
+.answerText { font-size: 0.9rem; line-height: 1.75; color: var(--text2); }
+
+.sourceWrap { margin-bottom: 1rem; }
+.sourceLabel {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  color: var(--text3); margin-bottom: 0.6rem;
+}
+.sources { display: flex; flex-direction: column; gap: 0.5rem; }
+.source {
+  background: var(--card); border: 1px solid var(--b0);
+  border-radius: var(--r); padding: 0.85rem 1rem;
+  text-align: left; transition: all 0.2s; cursor: pointer;
+}
+.source:hover { border-color: var(--b2); transform: translateX(3px); }
+.sourceSection {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  color: var(--cyan); margin-bottom: 0.25rem;
+}
+.sourceSnippet { font-size: 0.8rem; color: var(--text3); line-height: 1.5; margin-bottom: 0.4rem; }
+.sourceGo { font-family: var(--mono); font-size: 0.62rem; color: var(--blue2); }
+
+.newSearch {
+  font-family: var(--mono); font-size: 0.7rem;
+  color: var(--text3); background: transparent; border: none;
+  display: flex; align-items: center; gap: 0.4rem;
+  transition: color 0.2s;
+}
+.newSearch:hover { color: var(--text2); }
+
+@media (max-width: 720px) {
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal { max-height: 90vh; border-radius: var(--r2) var(--r2) 0 0; }
+  .shortcuts { display: none; }
+}

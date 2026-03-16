@@ -1,0 +1,43 @@
+name: Deploy Portfolio
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          # This is your Cloudflare Worker URL — not the API key itself
+          # The Worker holds the actual Gemini key server-side (never exposed)
+          REACT_APP_AI_PROXY: ${{ secrets.REACT_APP_AI_PROXY }}
+          CI: false
+
+      - name: Add .nojekyll
+        run: touch build/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
+          clean: true

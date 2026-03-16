@@ -1,0 +1,163 @@
+/* src/components/Navbar.module.css */
+.nav {
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:0.85rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all 0.3s ease;
+}
+.scrolled {
+  background: var(--nav-bg);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--nav-border);
+  box-shadow:0 4px 20px rgba(0,0,0,0.18);
+}
+
+.brand { display:flex;align-items:center;gap:0.6rem; }
+.brandDot {
+  width:8px;height:8px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+  animation:navPulse 2s ease-in-out infinite;
+}
+@keyframes navPulse{0%,100%{box-shadow:0 0 8px var(--cyan)}50%{box-shadow:0 0 20px var(--cyan),0 0 40px rgba(0,229,204,0.35)}}
+.brandText { font-family:var(--mono);font-size:0.85rem;font-weight:500;color:var(--text2); }
+.brandAccent { color:var(--cyan); }
+
+.menu { display:flex;align-items:center;gap:2rem;list-style:none; }
+.link {
+  font-family:var(--mono);font-size:0.72rem;letter-spacing:0.08em;
+  color:var(--text3);transition:color 0.2s;position:relative;padding-bottom:2px;
+}
+.link::after {
+  content:'';position:absolute;bottom:0;left:0;width:0;height:1px;
+  background:var(--cyan);transition:width 0.25s ease;
+}
+.link:hover,.link.active { color:var(--cyan); }
+.link:hover::after,.link.active::after { width:100%; }
+
+.right { display:flex;align-items:center;gap:0.75rem; }
+
+/* ── Moon / Sun toggle ───────────────────── */
+.themeToggle {
+  padding:0;
+  background:none;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+}
+.themeTrack {
+  width:52px;height:28px;border-radius:100px;
+  position:relative;display:flex;align-items:center;
+  transition:background 0.4s,border-color 0.4s;
+  padding:3px;
+}
+.themeDark .themeTrack {
+  background: radial-gradient(circle at 30% 40%, #1a0c3a 0%, #050c20 100%);
+  border:1.5px solid rgba(130,90,255,0.45);
+  box-shadow: inset 0 0 8px rgba(100,60,200,0.2), 0 0 10px rgba(130,90,255,0.15);
+}
+.themeLight .themeTrack {
+  background: linear-gradient(135deg, #87ceeb 0%, #ddeeff 100%);
+  border:1.5px solid rgba(100,170,255,0.5);
+  box-shadow: inset 0 0 8px rgba(255,220,60,0.15), 0 0 8px rgba(255,200,40,0.12);
+}
+.themeThumb {
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.4s, color 0.3s;
+  position:relative;
+}
+.themeDark .themeThumb {
+  transform:translateX(0px);
+  background:radial-gradient(circle at 35% 35%, #2d1f5e, #0f0824);
+  color:#c4b5fd;
+  box-shadow:0 0 6px rgba(167,139,250,0.5);
+}
+.themeLight .themeThumb {
+  transform:translateX(24px);
+  background:radial-gradient(circle at 35% 35%, #fff8cc, #ffd700);
+  color:#d97706;
+  box-shadow:0 0 10px rgba(255,200,50,0.55);
+}
+/* Small stars on dark track */
+.themeDark .themeTrack::before {
+  content:'·  ·  ·';
+  position:absolute;left:26px;top:50%;transform:translateY(-50%);
+  font-size:8px;letter-spacing:2px;color:rgba(200,180,255,0.6);
+  pointer-events:none;
+}
+/* Cloud hint on light track */
+.themeLight .themeTrack::before {
+  content:'☁';
+  position:absolute;left:6px;top:50%;transform:translateY(-50%);
+  font-size:10px;opacity:0.55;
+  pointer-events:none;
+}
+.themeToggle:hover .themeThumb { filter:brightness(1.15); }
+
+/* ── Search icon ──────────────────────────── */
+.searchIcon {
+  width:36px;height:36px;border-radius:var(--r);
+  border:1px solid var(--b1);background:rgba(45,140,255,0.06);color:var(--text3);
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;
+}
+.searchIcon:hover { border-color:var(--blue);color:var(--blue); }
+
+/* ── Download Resume ─────────────────────── */
+.downloadBtn {
+  display:inline-flex;align-items:center;gap:0.4rem;
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.07em;
+  padding:0.48rem 0.9rem;border-radius:6px;
+  border:1px solid var(--b2);background:transparent;color:var(--blue2);
+  cursor:pointer;transition:all 0.25s;white-space:nowrap;
+}
+.downloadBtn:hover { background:rgba(45,140,255,0.1);border-color:var(--blue);color:var(--blue); }
+
+/* ── Hire Me ─────────────────────────────── */
+.hire {
+  font-family:var(--mono);font-size:0.72rem;letter-spacing:0.1em;
+  padding:0.55rem 1.3rem;border:1px solid var(--cyan);color:var(--cyan);
+  background:rgba(0,229,204,0.05);border-radius:var(--r);
+  transition:all 0.25s;display:flex;align-items:center;gap:0.4rem;
+}
+.hire:hover { background:var(--cyan);color:var(--bg);box-shadow:var(--glow); }
+
+/* ── Hamburger ───────────────────────────── */
+.toggle { display:none;flex-direction:column;gap:5px;padding:0.5rem;border:none;background:transparent; }
+.toggle span { width:22px;height:2px;background:var(--text2);border-radius:2px;transition:all 0.3s;display:block; }
+.toggleOpen span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.toggleOpen span:nth-child(2){opacity:0}
+.toggleOpen span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+.mobileOnly { display:none; }
+.searchBtn  { font-family:var(--mono);font-size:0.78rem;display:flex;align-items:center;gap:0.5rem;color:var(--cyan);background:transparent;border:none; }
+
+/* ── Download toast ──────────────────────── */
+.dlToast {
+  position:fixed;bottom:1.75rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  z-index:9999;background:var(--card);
+  border:1px solid var(--green);border-radius:100px;
+  padding:0.6rem 1.5rem;font-family:var(--mono);font-size:0.68rem;
+  color:var(--green);display:flex;align-items:center;gap:0.5rem;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;
+  opacity:0;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,0.4);white-space:nowrap;
+}
+.dlToast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+/* ── Responsive ──────────────────────────── */
+@media(max-width:900px){
+  .menu {
+    display:none;position:fixed;inset:0;top:58px;
+    background:var(--nav-bg);flex-direction:column;align-items:center;justify-content:center;
+    gap:2rem;z-index:999;backdrop-filter:blur(20px);
+  }
+  .menu.open { display:flex; }
+  .link { font-size:1rem; }
+  .toggle { display:flex; }
+  .mobileOnly { display:block; }
+  .hire,.downloadBtn { display:none; }
+}
+@media(max-width:480px){
+  .themeToggle { transform:scale(0.9); }
+}
