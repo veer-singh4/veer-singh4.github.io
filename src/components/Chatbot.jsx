@@ -141,7 +141,7 @@ function analyseJD(jd) {
     [/certif|az.?305|az.?400/,           'Certifications ✅ (5 certs, 2 Expert-level)'],
     [/java|spring|microservice/,         'Java / Spring Boot / Microservices ✅'],
     [/security|devsecops|sast|dast/,     'DevSecOps / Security Gates ✅'],
-    [/gcp|google cloud/,                 'GCP ❌ (Azure + AWS focus, no GCP experience)'],
+    [/gcp|google cloud/,                 'GCP ❌ (Azure + AWS focus, lessGCP experience)'],
     [/golang|go lang|rust/,            'Go / Rust ❌ (not in skill set)'],
     [/ml|machine learning|data science/, 'ML / Data Science ⚠️ (has AI-102 cert but limited ML depth)'],
   ];
@@ -206,7 +206,7 @@ function localFallback(q) {
   if (/remote|locat|where|relocat/.test(l))
     return `Veer is based in **Bangalore, India** 📍 and is fully **remote-friendly** — open to remote, hybrid, or on-site roles globally.`;
 
-  return `I'm Veer's portfolio assistant. I can tell you about his **skills**, **certifications**, **work history**, or **why he's a great hire**.\n\nOr **paste a job description** and I'll score how well he matches it!`;
+  return `I'm Veer's portfolio assistant. I can tell you about his **skills**, **certifications**, **work history**, or **why he's a great hire**.\nnTry asking something specific`;
 }
 
 // ── Detect hire/contact intent locally (no API needed) ───────────────────
@@ -235,8 +235,8 @@ function Msg({ text }) {
 // ── Welcome message ───────────────────────────────────────────────────────
 const WELCOME = {
   from: 'bot', id: 0,
-  text: `👋 Hi! I'm Veer's AI assistant.\n\nAsk me anything about his background — or paste a job description and I'll tell you exactly how he fits.\n\nWhat would you like to know?`,
-  chips: ['Why should I hire Veer?', 'What are his certifications?', 'Paste a job description', 'How to contact Veer?'],
+  text: `👋 Hi! I'm Veer's AI assistant.\n\nAsk me anything about his background \n\nWhat would you like to know?`,
+  chips: ['Why should I hire Veer?', 'What are his certifications?', 'How to contact Veer?'],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -365,7 +365,7 @@ export default function Chatbot() {
   // ── Contextual chip suggestions ──────────────────────────────────────────
   const suggestChips = (q) => {
     const l = q.toLowerCase();
-    if (/hire|fit|why/.test(l))   return ['Paste a job description', 'I want to connect with Veer', 'What are his certifications?'];
+    if (/hire|fit|why/.test(l))   return ['I want to connect with Veer', 'What are his certifications?'];
     if (/cert/.test(l))           return ['Why should I hire Veer?', 'What are his skills?', 'I want to hire Veer'];
     if (/skill|tech/.test(l))     return ['Why should I hire Veer?', 'Tell me about his experience', 'I want to connect with Veer'];
     if (/contact|reach/.test(l))  return ['I want to hire Veer', 'Download his resume'];
@@ -379,7 +379,7 @@ export default function Chatbot() {
     busy            ? 'Thinking…' :
     hireFlow === 'ask_name'  ? 'Your name…' :
     hireFlow === 'ask_email' ? 'Your email address…' :
-    'Ask anything or paste a job description…';
+    'Ask anything…';
 
   return (
     <>
