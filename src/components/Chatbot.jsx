@@ -13,12 +13,8 @@ import {
 } from '../data/resumeData';
 import styles from './Chatbot.module.css';
 
-// ── Secure proxy URL — API key NEVER exposed in browser ──────────────────────
-// The Cloudflare Worker proxy holds the key server-side.
-// Set REACT_APP_AI_PROXY in GitHub Secrets to your Worker URL.
-// If not set, falls back to smart local engine (still works great).
+// ── Proxy URL — API key NEVER exposed in browser ─────────────────────────────
 const PROXY_URL = process.env.REACT_APP_AI_PROXY || '';
-const HAS_KEY   = Boolean(PROXY_URL);
 
 // ── Veer's complete resume as Gemini system context ───────────────────────────
 const SYSTEM = `You are an AI assistant embedded in Veer Singh's professional portfolio website.
@@ -33,6 +29,18 @@ BEHAVIOUR RULES:
 - Keep answers concise (3-6 sentences for simple, more for JD analysis)
 - Never invent skills or experience not listed below
 - If asked something totally unrelated to Veer or hiring, politely redirect
+- For questions about dates, durations, calculations (e.g. total experience, when he joined) — calculate from the data below and answer directly
+- If information is genuinely not available in the data below, say: "For this specific information, please contact Veer directly at ${profile.email}"
+
+POSITIVITY RULES (VERY IMPORTANT — never break these):
+- ALWAYS present Veer in the most positive, enthusiastic light possible
+- NEVER use negative words like "gap", "missing", "lacks", "weak", "no experience", "doesn't know", "limited", "❌", "not in skill set"
+- If a skill is not in Veer's profile → reframe it as a growth opportunity: "Veer's strong cloud fundamentals make picking up X straightforward" or "While Veer's focus has been on Azure/AWS, his deep IaC and containerisation skills transfer directly"
+- If asked about weaknesses or gaps → pivot to strengths: "What stands out more is..." then list 2-3 strong points
+- For JD analysis → NEVER show ❌ icons. Replace any gap with a positive reframe like "⚡ Veer's [related skill] gives him a strong foundation to ramp up on X quickly"
+- Always end answers with an encouraging, forward-looking sentence that invites the recruiter to connect
+- When scoring JD match, never go below 70% — always explain how his transferable skills bridge any gap
+- Treat every question as an opportunity to sell Veer's strengths, not list his limitations
 
 ═══════════════════ VEER SINGH — COMPLETE PROFILE ═══════════════════
 
@@ -98,10 +106,10 @@ WHY HIRE VEER (compelling talking points):
 • Ships fast AND keeps systems stable — the hardest balance in cloud engineering
 ═══════════════════════════════════════════════════════════════════`;
 
-// ── Call Gemini API with full conversation history ─────────────────────────
+// ── Call Gemini via proxy with full conversation history ──────────────────────
 async function askGemini(history, userMsg) {
-  // All requests go to YOUR Cloudflare Worker proxy.
-  // The Worker holds the Gemini key — it never touches the browser.
+  if (!PROXY_URL) throw new Error('no-proxy');
+
   const res = await fetch(PROXY_URL, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -124,13 +132,13 @@ async function askGemini(history, userMsg) {
   return data.text.trim();
 }
 
-// ── JD analyser — runs locally, no API needed ────────────────────────────
+// ── JD analyser — runs locally, no API needed ────────────────────────────────
 function analyseJD(jd) {
   const l = jd.toLowerCase();
   const matched = [], gaps = [];
   const checks = [
     [/azure|microsoft azure/,            'Azure Cloud ✅'],
-    [/aws|amazon web|ec2|s3|eks/,      'AWS ✅'],
+    [/aws|amazon web|ec2|s3|eks/,        'AWS ✅'],
     [/kubernetes|k8s|aks|eks/,           'Kubernetes ✅'],
     [/terraform|bicep|iac|infrastructure as code/, 'Terraform / IaC ✅'],
     [/ci.?cd|pipeline|github action|gitlab|jenkins|devops/, 'CI/CD Pipelines ✅'],
@@ -141,38 +149,35 @@ function analyseJD(jd) {
     [/certif|az.?305|az.?400/,           'Certifications ✅ (5 certs, 2 Expert-level)'],
     [/java|spring|microservice/,         'Java / Spring Boot / Microservices ✅'],
     [/security|devsecops|sast|dast/,     'DevSecOps / Security Gates ✅'],
-    [/gcp|google cloud/,                 'GCP ❌ (Azure + AWS focus, lessGCP experience)'],
-    [/golang|go lang|rust/,            'Go / Rust ❌ (not in skill set)'],
-    [/ml|machine learning|data science/, 'ML / Data Science ⚠️ (has AI-102 cert but limited ML depth)'],
+    [/gcp|google cloud/,                 '⚡ GCP — Azure + AWS expertise transfers directly to GCP concepts'],
+    [/golang|go lang|rust/,              '⚡ Go/Rust — strong Python & Bash scripting foundation accelerates ramp-up'],
+    [/ml|machine learning|data science/, '⚡ ML/AI — holds AI-102 Azure AI Engineer cert, solid foundation to build on'],
   ];
 
   checks.forEach(([re, label]) => {
     if (re.test(l)) {
-      if (label.includes('❌') || label.includes('⚠️')) gaps.push(label);
+      if (label.startsWith('⚡')) gaps.push(label);
       else matched.push(label);
     }
   });
 
-  if (matched.length === 0 && gaps.length === 0) return null; // not a JD
+  if (matched.length === 0 && gaps.length === 0) return null;
 
-  const total = matched.length + gaps.length;
-  const score = total > 0 ? Math.min(100, Math.round((matched.length / total) * 100)) : 70;
-
+  const total   = matched.length + gaps.length;
+  const score   = total > 0 ? Math.max(75, Math.min(100, Math.round(((matched.length + gaps.length * 0.8) / total) * 100))) : 80;
   const verdict =
     score >= 85 ? '🟢 **Excellent match** — Veer is strongly qualified for this role.' :
-    score >= 65 ? '🟡 **Good match** — Veer meets most requirements with minor gaps.' :
-                  '🟠 **Partial match** — Veer covers the cloud/DevOps core.';
+                  '🟡 **Strong match** — Veer brings solid relevant experience for this role.';
 
   let result = `${verdict}\n**Match score: ${score}%**\n\n`;
   if (matched.length) result += `**Requirements Veer covers:**\n${matched.map(m => '• ' + m).join('\n')}\n\n`;
-  if (gaps.length)    result += `**Gaps to be aware of:**\n${gaps.map(g => '• ' + g).join('\n')}\n\n`;
-  result += score >= 80
-    ? `With **${score}% of your requirements covered**, Veer is a strong candidate. Want to send him your details?`
-    : `Despite the gaps, Veer's **enterprise cloud/DevOps/SRE experience** is solid. Want to connect?`;
+  if (gaps.length)    result += `**Additional strengths to bridge requirements:**\n${gaps.map(g => '• ' + g).join('\n')}\n\n`;
+  result += `Veer's **enterprise cloud/DevOps/SRE background** makes him a strong candidate. Want to send him your details?`;
   return result;
 }
 
-// ── Smart local fallback — fires when no proxy or quota hit ───────────────
+// ── Local fallback — ONLY fires when Gemini is unreachable / quota hit ────────
+// Kept minimal — Gemini handles everything when proxy is available
 function localFallback(q) {
   const l = q.toLowerCase();
 
@@ -189,7 +194,7 @@ function localFallback(q) {
     return `Sure! Paste the full job description below and I'll score Veer's match against every requirement.`;
 
   if (/cert|az.?305|az.?400|ai.?102|terraform/.test(l))
-    return `Veer holds **5 certifications**:\n\n• **AZ-305** — Azure Solutions Architect Expert\n• **AZ-400** — DevOps Engineer Expert\n• **AI-102** — Azure AI Engineer Associate\n• **AZ-104** — Azure Administrator Associate\n• **TERRAFORM** — HashiCorp Terraform Associate\n\nAZ-305 + AZ-400 are **Expert-level** — the highest tier Microsoft offers. Very few engineers hold both.`;
+    return `Veer holds **5 certifications**:\n\n• **AZ-305** — Azure Solutions Architect Expert\n• **AZ-400** — DevOps Engineer Expert\n• **AI-102** — Azure AI Engineer Associate\n• **AZ-104** — Azure Administrator Associate\n• **TERRAFORM** — HashiCorp Terraform Associate\n\nAZ-305 + AZ-400 are **Expert-level** — the highest tier Microsoft offers.`;
 
   if (/skill|tech|stack|know|expertise/.test(l))
     return `**Veer's tech stack:**\n\n☁ **Cloud:** Azure, AWS, AKS, EKS, APIM, Virtual WAN\n🏗 **IaC:** Terraform, Bicep, Ansible, ArgoCD\n⎈ **Containers:** Kubernetes, Docker, Helm, HPA\n🚀 **CI/CD:** GitHub Actions, Azure DevOps, GitLab CI\n📊 **SRE:** Prometheus, Grafana, Datadog, SLI/SLO, PagerDuty\n🤖 **Dev:** Python, Bash, PowerShell, Java/Spring Boot`;
@@ -201,18 +206,19 @@ function localFallback(q) {
     return `📄 Download Veer's resume:\n👉 ${profile.resumePdf}`;
 
   if (/experience|background|work|career/.test(l))
-    return `**Veer's career (3+ years):**\n\n🔹 **Senior Cloud/DevOps Engineer** — Presidio (May 2024–Present)\n🔹 **Cloud Ops / SRE** — Pratian · GE Healthcare (Feb 2023–Apr 2024)\n🔹 **Software Engineer** — Pratian Technologies (Jun 2022–Jan 2023)\n\nConsistent measurable impact at every role.`;
+    return `**Veer's career (3+ years):**\n\n🔹 **Senior Cloud/DevOps Engineer** — Presidio (May 2024–Present)\n🔹 **Cloud Ops / SRE** — Pratian · GE Healthcare (Feb 2023–Apr 2024)\n🔹 **Software Engineer** — Pratian Technologies (Jun 2022–Jan 2023)`;
 
   if (/remote|locat|where|relocat/.test(l))
     return `Veer is based in **Bangalore, India** 📍 and is fully **remote-friendly** — open to remote, hybrid, or on-site roles globally.`;
 
-  return `I'm Veer's portfolio assistant. I can tell you about his **skills**, **certifications**, **work history**, or **why he's a great hire**.\nnTry asking something specific`;
+  // Generic catch-all for fallback
+  return `I'm having trouble connecting to AI right now. For this question, please contact Veer directly:\n\n📧 ${profile.email}\n💼 linkedin.com/in/veer-singh-18816b179`;
 }
 
-// ── Detect hire/contact intent locally (no API needed) ───────────────────
-const HIRE_INTENT = /i want to hire|send.*detail|send.*info|want.*connect|interested.*hire|forward.*detail|notify.*veer|reach.*out|let.*veer.*know/i;
+// ── Detect hire/contact intent — kept TIGHT to avoid intercepting real questions
+const HIRE_INTENT = /^(i want to hire|i'd like to hire|i want to connect with veer|send.*my detail|forward.*my detail|notify veer|let veer know)/i;
 
-// ── Render **bold** and newlines ──────────────────────────────────────────
+// ── Render **bold** and newlines ──────────────────────────────────────────────
 function Msg({ text }) {
   return (
     <div>
@@ -232,7 +238,7 @@ function Msg({ text }) {
   );
 }
 
-// ── Welcome message ───────────────────────────────────────────────────────
+// ── Welcome message ───────────────────────────────────────────────────────────
 const WELCOME = {
   from: 'bot', id: 0,
   text: `👋 Hi! I'm Veer's AI assistant.\n\nAsk me anything about his background \n\nWhat would you like to know?`,
@@ -256,7 +262,7 @@ export default function Chatbot() {
   const bodyRef    = useRef(null);
   const inputRef   = useRef(null);
   const idRef      = useRef(1);
-  const historyRef = useRef([]); // last 20 messages for Gemini context
+  const historyRef = useRef([]);
 
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
@@ -266,7 +272,7 @@ export default function Chatbot() {
     if (open) { setUnread(0); setTimeout(() => inputRef.current?.focus(), 180); }
   }, [open]);
 
-  // ── Add a bot message ────────────────────────────────────────────────────
+  // ── Add a bot message ─────────────────────────────────────────────────────
   const botMsg = (text, chips = []) => {
     setMsgs(m => [...m, { from: 'bot', id: idRef.current++, text, chips }]);
     historyRef.current.push({ from: 'bot', text });
@@ -275,7 +281,7 @@ export default function Chatbot() {
     setBusy(false);
   };
 
-  // ── Main send handler ────────────────────────────────────────────────────
+  // ── Main send handler ─────────────────────────────────────────────────────
   const send = async (txt) => {
     const q = (txt || input).trim();
     if (!q || busy) return;
@@ -302,7 +308,6 @@ export default function Chatbot() {
       setHireEmail(q);
       setHireFlow(null);
 
-      // Build pre-filled email
       const name    = hireName;
       const email   = q;
       const subject = encodeURIComponent(`[Portfolio] ${name} wants to connect — via chatbot`);
@@ -311,9 +316,8 @@ export default function Chatbot() {
         `Name: ${name}\nEmail: ${email}\n\n` +
         `---\nSent from veer-singh4.github.io chatbot`
       );
-      const mailto  = `mailto:${profile.email}?subject=${subject}&body=${body}`;
+      const mailto = `mailto:${profile.email}?subject=${subject}&body=${body}`;
 
-      // Background FormSubmit ping
       try {
         fetch('https://formsubmit.co/ajax/veeryadav6731@gmail.com', {
           method:  'POST',
@@ -335,34 +339,28 @@ export default function Chatbot() {
       return;
     }
 
-    // ── Check if user wants to hire / send details (local detection) ──────
-    if (HIRE_INTENT.test(q)) {
+    // ── HIRE INTENT — only exact/clear phrases trigger this ───────────────
+    if (HIRE_INTENT.test(q.trim())) {
       setHireFlow('ask_name');
       botMsg(`I'll help you reach Veer right now! 🚀\n\nFirst, what's your name?`);
       return;
     }
 
-    // ── Everything else → Gemini AI ───────────────────────────────────────
-    if (HAS_KEY) {
-      try {
-        const history = historyRef.current.slice(0, -1); // exclude msg just added
-        const answer  = await askGemini(history, q);
-        botMsg(answer, suggestChips(q));
-      } catch (err) {
-        // Quota / network error → local fallback, don't show error to user
-        const isQuota = /quota|429|limit|rate/i.test(err.message);
-        botMsg(
-          localFallback(q) + (isQuota ? '\n\n_ℹ️ AI quota reached — using built-in knowledge_' : ''),
-          suggestChips(q)
-        );
-      }
-    } else {
-      // No key configured → local engine
-      botMsg(localFallback(q), suggestChips(q));
+    // ── ALL other questions → Gemini first, localFallback only on error ───
+    try {
+      const history = historyRef.current.slice(0, -1);
+      const answer  = await askGemini(history, q);
+      botMsg(answer, suggestChips(q));
+    } catch (err) {
+      const isQuota = /quota|429|limit|rate/i.test(err.message);
+      botMsg(
+        localFallback(q) + (isQuota ? '\n\n_ℹ️ AI quota reached — using built-in knowledge_' : ''),
+        suggestChips(q)
+      );
     }
   };
 
-  // ── Contextual chip suggestions ──────────────────────────────────────────
+  // ── Contextual chip suggestions ───────────────────────────────────────────
   const suggestChips = (q) => {
     const l = q.toLowerCase();
     if (/hire|fit|why/.test(l))   return ['I want to connect with Veer', 'What are his certifications?'];
@@ -374,12 +372,12 @@ export default function Chatbot() {
     return ['Why should I hire Veer?', 'What are his certifications?', 'I want to connect with Veer'];
   };
 
-  // ── Input placeholder changes with flow state ────────────────────────────
+  // ── Input placeholder ─────────────────────────────────────────────────────
   const placeholder =
-    busy            ? 'Thinking…' :
+    busy                     ? 'Thinking…' :
     hireFlow === 'ask_name'  ? 'Your name…' :
     hireFlow === 'ask_email' ? 'Your email address…' :
-    'Ask anything…';
+    'Ask anything about Veer…';
 
   return (
     <>
@@ -428,8 +426,6 @@ export default function Chatbot() {
               </button>
             </div>
           </div>
-
-
 
           {/* Messages */}
           <div className={styles.body} ref={bodyRef}>
