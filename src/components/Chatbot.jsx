@@ -1,6 +1,6 @@
 // Chatbot.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Smart AI chatbot powered by Google Gemini 1.5 Flash
+// Smart AI chatbot powered by Google Gemini 2.5 Flash
 // API key loaded from environment variable (safe for public GitHub repos)
 // Handles:
 //   • Any natural question → Gemini answers using Veer's resume as context
@@ -16,9 +16,40 @@ import styles from './Chatbot.module.css';
 // ── Proxy URL — API key NEVER exposed in browser ─────────────────────────────
 const PROXY_URL = process.env.REACT_APP_AI_PROXY || '';
 
+// ── Accurate experience calculator ───────────────────────────────────────────
+function calcMonths(fromYear, fromMonth, toYear, toMonth) {
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth);
+}
+
+function fmtDuration(totalMonths) {
+  const years  = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  if (years > 0 && months > 0) return `${years} year${years > 1 ? 's' : ''} and ${months} month${months > 1 ? 's' : ''}`;
+  if (years > 0)               return `${years} year${years > 1 ? 's' : ''}`;
+  return `${months} month${months > 1 ? 's' : ''}`;
+}
+
+const now = new Date();
+const ny  = now.getFullYear();
+const nm  = now.getMonth() + 1; // 1-based month
+const currentDateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Fixed periods (ended roles — never change)
+const GE_MONTHS      = calcMonths(2023, 2, 2024, 4);  // Feb 2023 → Apr 2024 = 14 months
+const PRATIAN_MONTHS = calcMonths(2022, 6, 2023, 1);  // Jun 2022 → Jan 2023 = 7 months
+
+// Dynamic period (current role — grows every month)
+const PRESIDIO_MONTHS = calcMonths(2024, 5, ny, nm);  // May 2024 → today
+
+// Total = all three roles combined
+const TOTAL_MONTHS = PRESIDIO_MONTHS + GE_MONTHS + PRATIAN_MONTHS;
+
 // ── Veer's complete resume as Gemini system context ───────────────────────────
 const SYSTEM = `You are an AI assistant embedded in Veer Singh's professional portfolio website.
 Your ONLY job is to represent Veer professionally and help visitors — recruiters, hiring managers, engineers — understand his background.
+
+TODAY'S DATE: ${currentDateStr}
+USE THIS DATE for all experience calculations. Never guess or assume the current date.
 
 BEHAVIOUR RULES:
 - Be natural, warm, conversational — like a knowledgeable colleague, NOT a robot
@@ -29,24 +60,40 @@ BEHAVIOUR RULES:
 - Keep answers concise (3-6 sentences for simple, more for JD analysis)
 - Never invent skills or experience not listed below
 - If asked something totally unrelated to Veer or hiring, politely redirect
-- For questions about dates, durations, calculations (e.g. total experience, when he joined) — calculate from the data below and answer directly
+- For questions about dates, durations, calculations — ALWAYS use the PRE-CALCULATED values below, never recalculate yourself
 - If information is genuinely not available in the data below, say: "For this specific information, please contact Veer directly at ${profile.email}"
 
 POSITIVITY RULES (VERY IMPORTANT — never break these):
 - ALWAYS present Veer in the most positive, enthusiastic light possible
 - NEVER use negative words like "gap", "missing", "lacks", "weak", "no experience", "doesn't know", "limited", "❌", "not in skill set"
-- If a skill is not in Veer's profile → reframe it as a growth opportunity: "Veer's strong cloud fundamentals make picking up X straightforward" or "While Veer's focus has been on Azure/AWS, his deep IaC and containerisation skills transfer directly"
+- If a skill is not in Veer's profile → reframe it as a growth opportunity: "Veer's strong cloud fundamentals make picking up X straightforward"
 - If asked about weaknesses or gaps → pivot to strengths: "What stands out more is..." then list 2-3 strong points
 - For JD analysis → NEVER show ❌ icons. Replace any gap with a positive reframe like "⚡ Veer's [related skill] gives him a strong foundation to ramp up on X quickly"
 - Always end answers with an encouraging, forward-looking sentence that invites the recruiter to connect
 - When scoring JD match, never go below 70% — always explain how his transferable skills bridge any gap
 - Treat every question as an opportunity to sell Veer's strengths, not list his limitations
 
+═══════════ PRE-CALCULATED EXPERIENCE DURATIONS (USE THESE EXACT VALUES) ═══════════
+
+⚠️ IMPORTANT: These numbers are calculated by JavaScript at page load using today's real date.
+ALWAYS use these values when asked about experience, duration, or time at a company.
+NEVER recalculate or override these numbers.
+
+• Presidio (May 2024 – Present):       ${fmtDuration(PRESIDIO_MONTHS)} (${PRESIDIO_MONTHS} months)
+• GE Healthcare (Feb 2023 – Apr 2024): ${fmtDuration(GE_MONTHS)} (${GE_MONTHS} months) — ended role
+• Pratian Software Eng (Jun 2022 – Jan 2023): ${fmtDuration(PRATIAN_MONTHS)} (${PRATIAN_MONTHS} months) — ended role
+• TOTAL career experience:             ${fmtDuration(TOTAL_MONTHS)} (${TOTAL_MONTHS} months total, since Jun 2022)
+
+Example correct answers:
+- "How long has Veer been at Presidio?" → "${fmtDuration(PRESIDIO_MONTHS)}"
+- "What is Veer's total experience?" → "${fmtDuration(TOTAL_MONTHS)}"
+- "How long did he work at GE Healthcare?" → "${fmtDuration(GE_MONTHS)}"
+
 ═══════════════════ VEER SINGH — COMPLETE PROFILE ═══════════════════
 
 Name: Veer Singh
 Role: Senior Cloud / DevOps / Site Reliability Engineer
-Experience: 3+ years
+Experience: ${fmtDuration(TOTAL_MONTHS)} total
 Location: Bangalore, India (remote-friendly, open globally)
 Email: ${profile.email}
 LinkedIn: ${profile.linkedin}
@@ -71,15 +118,15 @@ KEY ACHIEVEMENTS (use these numbers in answers):
 
 WORK EXPERIENCE:
 
-1. Senior Cloud / DevOps Engineer — Presidio (May 2024 – Present, Current)
+1. Senior Cloud / DevOps Engineer — Presidio (May 2024 – Present | ${fmtDuration(PRESIDIO_MONTHS)})
 ${experience[0].bullets.map(b => '• ' + b.text).join('\n')}
 Tech: ${experience[0].tags.join(', ')}
 
-2. Cloud Operations / Site Reliability Engineer — Pratian Technologies · GE Healthcare (Feb 2023 – Apr 2024)
+2. Cloud Operations / Site Reliability Engineer — Pratian Technologies · GE Healthcare (Feb 2023 – Apr 2024 | ${fmtDuration(GE_MONTHS)})
 ${experience[1].bullets.map(b => '• ' + b.text).join('\n')}
 Tech: ${experience[1].tags.join(', ')}
 
-3. Software Engineer — Pratian Technologies (Jun 2022 – Jan 2023)
+3. Software Engineer — Pratian Technologies (Jun 2022 – Jan 2023 | ${fmtDuration(PRATIAN_MONTHS)})
 ${experience[2].bullets.map(b => '• ' + b.text).join('\n')}
 Tech: ${experience[2].tags.join(', ')}
 
@@ -104,6 +151,7 @@ WHY HIRE VEER (compelling talking points):
 • IaC at scale — 40+ reusable Terraform modules, policy-as-code, zero config drift
 • Collaborative leader — mentored 10+ engineers, earned highest peer recognition award
 • Ships fast AND keeps systems stable — the hardest balance in cloud engineering
+• ${fmtDuration(TOTAL_MONTHS)} of hands-on enterprise cloud/DevOps/SRE experience
 ═══════════════════════════════════════════════════════════════════`;
 
 // ── Call Gemini via proxy with full conversation history ──────────────────────
@@ -177,18 +225,22 @@ function analyseJD(jd) {
 }
 
 // ── Local fallback — ONLY fires when Gemini is unreachable / quota hit ────────
-// Kept minimal — Gemini handles everything when proxy is available
 function localFallback(q) {
   const l = q.toLowerCase();
 
-  // Long text → try JD analysis first
   if (q.length > 120) {
     const jdResult = analyseJD(q);
     if (jdResult) return jdResult;
   }
 
+  if (/total.*exp|exp.*total|how long|how many year|career|years of exp/.test(l))
+    return `Veer brings **${fmtDuration(TOTAL_MONTHS)}** of total experience as a Senior Cloud/DevOps/SRE Engineer:\n\n• **Presidio** (May 2024 – Present): ${fmtDuration(PRESIDIO_MONTHS)}\n• **GE Healthcare** (Feb 2023 – Apr 2024): ${fmtDuration(GE_MONTHS)}\n• **Pratian Technologies** (Jun 2022 – Jan 2023): ${fmtDuration(PRATIAN_MONTHS)}`;
+
+  if (/presidio|current.*role|current.*job/.test(l))
+    return `Veer has been a **Senior Cloud/DevOps Engineer at Presidio** for **${fmtDuration(PRESIDIO_MONTHS)}** (since May 2024). In this time he's delivered 50% cloud cost savings, 60% faster CI/CD, and earned both the Above & Beyond Award 2025 and Spot Award 2024.`;
+
   if (/hire|good fit|should i|why.*veer|recommend|qualify|suitable|worth/.test(l))
-    return `Here's why Veer stands out:\n\n• **Two Expert-level Microsoft certs** (AZ-305 + AZ-400) — top 3% of Azure engineers\n• **50% cloud cost reduction** at Presidio — $25k/year saved\n• **60% faster CI/CD** and **99.9% uptime** on enterprise workloads\n• Full SRE: SLI/SLO, incident response, DR drills, chaos testing\n• Terraform IaC across **10+ enterprise accounts**, 40+ reusable modules\n• **Above & Beyond Award 2025** — highest peer recognition at Presidio\n\nPaste your job description and I'll analyse exactly how he matches.`;
+    return `Here's why Veer stands out:\n\n• **Two Expert-level Microsoft certs** (AZ-305 + AZ-400) — top 3% of Azure engineers\n• **50% cloud cost reduction** at Presidio — $25k/year saved\n• **60% faster CI/CD** and **99.9% uptime** on enterprise workloads\n• Full SRE: SLI/SLO, incident response, DR drills, chaos testing\n• Terraform IaC across **10+ enterprise accounts**, 40+ reusable modules\n• **Above & Beyond Award 2025** — highest peer recognition at Presidio\n• **${fmtDuration(TOTAL_MONTHS)}** of hands-on enterprise cloud experience\n\nPaste your job description and I'll analyse exactly how he matches.`;
 
   if (/jd|job desc|position|require|opening|paste/.test(l) && l.length < 80)
     return `Sure! Paste the full job description below and I'll score Veer's match against every requirement.`;
@@ -206,16 +258,15 @@ function localFallback(q) {
     return `📄 Download Veer's resume:\n👉 ${profile.resumePdf}`;
 
   if (/experience|background|work|career/.test(l))
-    return `**Veer's career (3+ years):**\n\n🔹 **Senior Cloud/DevOps Engineer** — Presidio (May 2024–Present)\n🔹 **Cloud Ops / SRE** — Pratian · GE Healthcare (Feb 2023–Apr 2024)\n🔹 **Software Engineer** — Pratian Technologies (Jun 2022–Jan 2023)`;
+    return `**Veer's career (${fmtDuration(TOTAL_MONTHS)}):**\n\n🔹 **Senior Cloud/DevOps Engineer** — Presidio (May 2024–Present | ${fmtDuration(PRESIDIO_MONTHS)})\n🔹 **Cloud Ops / SRE** — Pratian · GE Healthcare (Feb 2023–Apr 2024 | ${fmtDuration(GE_MONTHS)})\n🔹 **Software Engineer** — Pratian Technologies (Jun 2022–Jan 2023 | ${fmtDuration(PRATIAN_MONTHS)})`;
 
   if (/remote|locat|where|relocat/.test(l))
     return `Veer is based in **Bangalore, India** 📍 and is fully **remote-friendly** — open to remote, hybrid, or on-site roles globally.`;
 
-  // Generic catch-all for fallback
   return `I'm having trouble connecting to AI right now. For this question, please contact Veer directly:\n\n📧 ${profile.email}\n💼 linkedin.com/in/veer-singh-18816b179`;
 }
 
-// ── Detect hire/contact intent — kept TIGHT to avoid intercepting real questions
+// ── Detect hire/contact intent ────────────────────────────────────────────────
 const HIRE_INTENT = /^(i want to hire|i'd like to hire|i want to connect with veer|send.*my detail|forward.*my detail|notify veer|let veer know)/i;
 
 // ── Render **bold** and newlines ──────────────────────────────────────────────
@@ -254,7 +305,6 @@ export default function Chatbot() {
   const [input,     setInput]     = useState('');
   const [busy,      setBusy]      = useState(false);
   const [unread,    setUnread]    = useState(0);
-  // Hire flow state: null | 'ask_name' | 'ask_email' | 'done'
   const [hireFlow,  setHireFlow]  = useState(null);
   const [hireName,  setHireName]  = useState('');
   const [hireEmail, setHireEmail] = useState('');
@@ -272,7 +322,6 @@ export default function Chatbot() {
     if (open) { setUnread(0); setTimeout(() => inputRef.current?.focus(), 180); }
   }, [open]);
 
-  // ── Add a bot message ─────────────────────────────────────────────────────
   const botMsg = (text, chips = []) => {
     setMsgs(m => [...m, { from: 'bot', id: idRef.current++, text, chips }]);
     historyRef.current.push({ from: 'bot', text });
@@ -281,21 +330,17 @@ export default function Chatbot() {
     setBusy(false);
   };
 
-  // ── Main send handler ─────────────────────────────────────────────────────
   const send = async (txt) => {
     const q = (txt || input).trim();
     if (!q || busy) return;
     setInput('');
 
-    // Add user message
     setMsgs(m => [...m, { from: 'user', id: idRef.current++, text: q, chips: [] }]);
     historyRef.current.push({ from: 'user', text: q });
     setBusy(true);
 
-    // Small natural delay
     await new Promise(r => setTimeout(r, 350 + Math.random() * 250));
 
-    // ── HIRE FLOW (local, no API needed) ──────────────────────────────────
     if (hireFlow === 'ask_name') {
       setHireName(q);
       setHireFlow('ask_email');
@@ -339,14 +384,12 @@ export default function Chatbot() {
       return;
     }
 
-    // ── HIRE INTENT — only exact/clear phrases trigger this ───────────────
     if (HIRE_INTENT.test(q.trim())) {
       setHireFlow('ask_name');
       botMsg(`I'll help you reach Veer right now! 🚀\n\nFirst, what's your name?`);
       return;
     }
 
-    // ── ALL other questions → Gemini first, localFallback only on error ───
     try {
       const history = historyRef.current.slice(0, -1);
       const answer  = await askGemini(history, q);
@@ -360,7 +403,6 @@ export default function Chatbot() {
     }
   };
 
-  // ── Contextual chip suggestions ───────────────────────────────────────────
   const suggestChips = (q) => {
     const l = q.toLowerCase();
     if (/hire|fit|why/.test(l))   return ['I want to connect with Veer', 'What are his certifications?'];
@@ -372,7 +414,6 @@ export default function Chatbot() {
     return ['Why should I hire Veer?', 'What are his certifications?', 'I want to connect with Veer'];
   };
 
-  // ── Input placeholder ─────────────────────────────────────────────────────
   const placeholder =
     busy                     ? 'Thinking…' :
     hireFlow === 'ask_name'  ? 'Your name…' :
@@ -381,7 +422,6 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* ── FAB button ── */}
       <button
         className={`${styles.fab} ${open ? styles.fabOpen : ''}`}
         onClick={() => setOpen(o => !o)}
@@ -392,11 +432,8 @@ export default function Chatbot() {
         {!open && <span className={styles.fabLabel}>Ask AI</span>}
       </button>
 
-      {/* ── Chat window ── */}
       {open && (
         <div className={styles.window}>
-
-          {/* Header */}
           <div className={styles.header}>
             <div className={styles.hLeft}>
               <div className={styles.hAv}>🤖</div>
@@ -427,7 +464,6 @@ export default function Chatbot() {
             </div>
           </div>
 
-          {/* Messages */}
           <div className={styles.body} ref={bodyRef}>
             {msgs.map(m => (
               <div key={m.id}>
@@ -447,7 +483,6 @@ export default function Chatbot() {
               </div>
             ))}
 
-            {/* Typing indicator */}
             {busy && (
               <div className={`${styles.msg} ${styles.msgBot}`}>
                 <div className={styles.msgAv}>🤖</div>
@@ -460,7 +495,6 @@ export default function Chatbot() {
             )}
           </div>
 
-          {/* Input */}
           <div className={styles.inputRow}>
             <input
               ref={inputRef}
