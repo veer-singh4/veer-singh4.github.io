@@ -14,7 +14,7 @@ export const profile = {
     github: "https://github.com/veer-singh4",
     linkedin: "https://linkedin.com/in/veer-singh-18816b179",
     medium: "https://medium.com/@veeryadav6731",
-    available: true,
+    available: false,
     resumePdf: "https://veer-singh4.github.io/Veer_Singh_Resume.pdf",
     summary: "Results-driven Senior Cloud / DevOps / SRE Engineer with 3+ years architecting and automating secure multi-cloud infrastructure at enterprise scale. Delivered 50% cloud cost reduction, 60% faster CI/CD, 30% lower MTTR, and 99.9% uptime SLOs. Holds 5 Microsoft & HashiCorp certifications including Azure Solutions Architect Expert (AZ-305), DevOps Engineer Expert (AZ-400) & AI Engineer (AI-102). Above & Beyond Award recipient. Strong SRE disciplines: SLIs/SLOs, chaos testing, DR, incident automation.",
 };

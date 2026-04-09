@@ -104,7 +104,7 @@ export default function Navbar({ theme, toggleTheme, onSearchOpen, onHire }) {
           </button>
 
           <button className={styles.hire} onClick={onHire}>
-            <MailIcon/> Hire Me
+            <MailIcon/> Contact Me
           </button>
 
           <button

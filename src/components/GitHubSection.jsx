@@ -29,7 +29,7 @@ export default function GitHubSection() {
               </div>
               <div className={styles.topRight}>
                 <span className={styles.openBadge}>
-                  <span className={styles.openDot} />Open to work
+                  <span className={styles.openDot} />Working Senior Cloud/DevOps/SRE roles
                 </span>
               </div>
             </div>

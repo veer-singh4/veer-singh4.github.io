@@ -8,11 +8,11 @@ import photo from '../assets/photo.jpg';
 const VOICE_TEXT =
   "Hi, I'm Veer Singh — a Senior Cloud, DevOps, and Site Reliability Engineer with " +
   "over 3 years of experience building enterprise-grade multi-cloud infrastructure. " +
-  "At Presidio, I delivered a 50 percent reduction in cloud costs, 60 percent faster " +
+  "I delivered a 50 percent reduction in cloud costs, 60 percent faster " +
   "deployments, and 99.9 percent uptime SLOs. I hold 5 certifications including " +
   "Azure Solutions Architect Expert and DevOps Engineer Expert. " +
   "I'm passionate about infrastructure that ships fast and stays reliable. " +
-  "I'm currently open to senior Cloud, DevOps, and SRE roles — feel free to reach out!";
+  "I'm currently Working as a Senior Cloud, DevOps, and SRE — feel free to reach out!";
 
 // ── Guaranteed male voice picker — works on iOS, Android, Windows, Mac ────────
 // ── Bulletproof male voice — works on iOS, Android, Windows, Mac ─────────────
@@ -345,7 +345,7 @@ export default function Hero({ onSearchOpen }) {
 
       {/* ── LEFT: Copy ── */}
       <div className={styles.left}>
-        <div className={styles.badge}><span className={styles.badgeDot}/>AVAILABLE FOR SENIOR ROLES</div>
+        <div className={styles.badge}><span className={styles.badgeDot}/>SENIOR CLOUD ENGINEER</div>
 
         <p className={styles.greeting}>Hi, I'm</p>
         <h1 className={styles.name}>

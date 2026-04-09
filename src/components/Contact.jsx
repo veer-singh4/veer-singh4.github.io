@@ -74,7 +74,7 @@ export default function Contact() {
             <div className={styles.formHead}>
               <h3 className={styles.formTitle}>Send a Message</h3>
               <p className={styles.formSub}>
-                Open to Senior Cloud, DevOps &amp; SRE roles. Also available for consulting and contract work.
+                Senior Cloud, DevOps &amp; SRE roles.
               </p>
             </div>
 

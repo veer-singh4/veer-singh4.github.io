@@ -11,10 +11,10 @@ export default function About() {
         <div className={styles.grid}>
           <div className={`${styles.text} reveal-l`}>
             <p>I'm a <strong>Senior Cloud / DevOps / SRE Engineer</strong> with 3+ years designing, automating, and scaling enterprise-grade multi-cloud infrastructure. I thrive at the intersection of <strong>speed and reliability</strong> — shipping faster without breaking things.</p>
-            <p>Currently at <strong>Presidio</strong>, I architect multi-cloud platforms on Azure & AWS for 10+ enterprise accounts, delivering: <strong>50% cost reduction</strong> through APIM consolidation, <strong>60% faster releases</strong> via end-to-end CI/CD automation, and <strong>99.9% uptime SLOs</strong> backed by rock-solid hybrid networking.</p>
+            <p>I architect multi-cloud platforms on Azure & AWS for 10+ enterprise accounts, delivering: <strong>50% cost reduction</strong> through APIM consolidation, <strong>60% faster releases</strong> via end-to-end CI/CD automation, and <strong>99.9% uptime SLOs</strong> backed by rock-solid hybrid networking.</p>
             <p>Previously at <strong>Pratian Technologies (GE Healthcare)</strong>, I built SRE observability stacks, optimised Kubernetes clusters, and championed platform engineering — sustaining <strong>zero unplanned downtime</strong> over 8 months for critical healthcare production systems.</p>
             <div className={styles.chips}>
-              {['📍 Bangalore, India','💼 Open to Opportunities','🌐 Remote-Friendly','🏆 Above & Beyond Award 2025'].map(c => (
+              {['📍 Bangalore, India','💼 Senior Cloud Engineer','🌐 Remote-Friendly','🏆 Above & Beyond Award 2025'].map(c => (
                 <span key={c} className={styles.chip}>{c}</span>
               ))}
             </div>

@@ -77,7 +77,7 @@ function generateAnswer(query, results, terms) {
   }
 
   if (q.match(/\b(contact|email|phone|hire|reach)\b/)) {
-    return `You can reach Veer at veeryadav6731@gmail.com. He's based in Bangalore, India and is open to Senior Cloud, DevOps & SRE roles — remote-friendly. LinkedIn: linkedin.com/in/veer-singh-18816b179 | GitHub: github.com/veer-singh4`;
+    return `You can reach Veer at veeryadav6731@gmail.com. He's based in Bangalore, India and is Senior Cloud, DevOps & SRE roles — remote-friendly. LinkedIn: linkedin.com/in/veer-singh-18816b179 | GitHub: github.com/veer-singh4`;
   }
 
   if (q.match(/\b(experience|work|job|company|presidio|pratian|ge|healthcare)\b/)) {

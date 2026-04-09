@@ -100,7 +100,7 @@ LinkedIn: ${profile.linkedin}
 GitHub: ${profile.github}
 Medium: ${profile.medium}
 Resume PDF: ${profile.resumePdf}
-Status: Open to work — senior Cloud/DevOps/SRE roles
+Status: Senior Cloud/DevOps/SRE roles
 
 SUMMARY:
 ${profile.summary}
@@ -261,7 +261,7 @@ function localFallback(q) {
     return `**Veer's career (${fmtDuration(TOTAL_MONTHS)}):**\n\n🔹 **Senior Cloud/DevOps Engineer** — Presidio (May 2024–Present | ${fmtDuration(PRESIDIO_MONTHS)})\n🔹 **Cloud Ops / SRE** — Pratian · GE Healthcare (Feb 2023–Apr 2024 | ${fmtDuration(GE_MONTHS)})\n🔹 **Software Engineer** — Pratian Technologies (Jun 2022–Jan 2023 | ${fmtDuration(PRATIAN_MONTHS)})`;
 
   if (/remote|locat|where|relocat/.test(l))
-    return `Veer is based in **Bangalore, India** 📍 and is fully **remote-friendly** — open to remote, hybrid, or on-site roles globally.`;
+    return `Veer is based in **Bangalore, India** 📍`;
 
   return `I'm having trouble connecting to AI right now. For this question, please contact Veer directly:\n\n📧 ${profile.email}\n💼 linkedin.com/in/veer-singh-18816b179`;
 }
